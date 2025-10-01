@@ -76,20 +76,27 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state
+# Initialize session state# Initialize session state
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
+
 if 'groq_client' not in st.session_state:
-    # Get API key from secrets or environment
-    api_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY", ""))
+    # Get API key from Streamlit secrets (preferred) or environment
+    api_key = st.secrets.get("GROQ_API_KEY")
     if api_key:
-        st.session_state.groq_client = Groq(api_key=api_key)
+        try:
+            st.session_state.groq_client = Groq(api_key=api_key)
+        except Exception as e:
+            st.error(f"Error initializing Groq client: {e}")
+            st.session_state.groq_client = None
     else:
         st.session_state.groq_client = None
+
 if 'last_audio' not in st.session_state:
     st.session_state.last_audio = None
 if 'conversation_count' not in st.session_state:
     st.session_state.conversation_count = 0
+
 
 # Functions
 def speech_to_text(audio_bytes):
